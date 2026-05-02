@@ -1,0 +1,28 @@
+/* Marta's Coffee — paleta principal */
+:root {
+    /* Marca */
+    --color-espresso: #2c1a0e; /* textos principales, nav */
+    --color-canela: #7b4a2d; /* botones primarios, links */
+    --color-caramelo: #c4956a; /* acentos, hover, badges */
+    --color-crema: #e8d5b7; /* bordes, separadores */
+    --color-leche: #faf3e8; /* fondo general */
+
+    /* Tipografía */
+    --text-primary: var(--color-espresso);
+    --text-secondary: var(--color-canela);
+    --text-muted: var(--color-caramelo);
+
+    /* Fondos */
+    --bg-page: var(--color-leche);
+    --bg-card: #ffffff;
+    --bg-accent: var(--color-crema);
+
+    /* Botones */
+    --btn-bg: var(--color-canela);
+    --btn-bg-hover: var(--color-espresso);
+    --btn-text: #ffffff;
+
+    /* Bordes */
+    --border-color: var(--color-crema);
+    --border-radius: 8px;
+}
