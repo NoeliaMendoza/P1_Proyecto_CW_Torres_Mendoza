@@ -1,21 +1,26 @@
-import { define, html } from 'hybrids';
-import { Router } from '@vaadin/router';
-
-function updateCount(host) {
-    host.count = getCartCount();
-}
-
-define({
-    tag: 'nav-bar',
-
-    render: ({ count }) => html`
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Header</title>
         <style>
-            :host {
+            :root {
                 --color-espresso: #2c1a0e;
                 --color-canela: #7b4a2d;
                 --color-caramelo: #c4956a;
                 --color-crema: #e8d5b7;
                 --color-leche: #faf3e8;
+            }
+
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                background-color: var(--color-leche);
             }
 
             header {
@@ -33,7 +38,6 @@ define({
                 font-family: 'Playfair Display', serif;
                 color: var(--color-espresso);
                 letter-spacing: 0.1px;
-                margin: 0;
             }
 
             nav {
@@ -74,14 +78,15 @@ define({
                 color: var(--color-leche);
             }
         </style>
-
+    </head>
+    <body>
         <header>
             <h1>Marta's Coffee</h1>
             <nav>
-                <a href="/">Inicio</a>
-                <a href="/menu">Menú</a>
-                <a class="init-sesion" href="/login">Iniciar Sesión</a>
+                <a href="">Inicio</a>
+                <a href="">Menú</a>
+                <a class="init-sesion" href="">Iniciar Sesión</a>
             </nav>
         </header>
-    `,
-});
+    </body>
+</html>

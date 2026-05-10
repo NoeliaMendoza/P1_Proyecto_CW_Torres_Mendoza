@@ -12,6 +12,7 @@
     "vite": "^8.0.10"
   },
   "dependencies": {
+    "@vaadin/router": "^2.0.1",
     "hybrids": "^9.1.22"
   }
 }
