@@ -5,6 +5,13 @@ define({
 
     render: () => html`
         <style>
+            :host {
+                --color-espresso: #2c1a0e;
+                --color-canela: #7b4a2d;
+                --color-caramelo: #c4956a;
+                --color-crema: #e8d5b7;
+                --color-leche: #faf3e8;
+            }
             .login {
                 min-height: 80vh;
                 display: flex;
@@ -75,16 +82,20 @@ define({
                 border-radius: 30px;
                 border: none;
                 background-color: rgb(37, 19, 5);
-                color: var(--color-espresso);
+                color: var(--color-leche);
                 font-weight: 600;
                 font-size: 1rem;
                 cursor: pointer;
                 transition: opacity 0.3s ease;
             }
 
+            .login-card button:hover {
+                opacity: 0.8;
+            }
+
             .login-card p {
                 text-align: center;
-                font-size: 0.9rem;
+                font-size: 1rem;
             }
 
             .login-card p a {
