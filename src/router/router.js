@@ -1,4 +1,6 @@
 import { Router } from '@vaadin/router';
+import { adminGuard, guestGuard } from './guards.js';
+
 const router = new Router();
 router.setRoutes([
     {
