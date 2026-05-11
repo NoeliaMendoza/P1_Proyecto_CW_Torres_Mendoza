@@ -1,5 +1,5 @@
 import { Router } from '@vaadin/router';
-import { adminGuard, guestGuard } from './guards.js';
+import { adminGuard, authGuard, guestGuard } from './guards.js';
 
 const router = new Router();
 router.setRoutes([
@@ -22,6 +22,7 @@ router.setRoutes([
     {
         path: '/tracking',
         component: 'tracking-page',
+        beforeEnter: authGuard,
     },
     { path: '/admin', component: 'admin-page' },
     {

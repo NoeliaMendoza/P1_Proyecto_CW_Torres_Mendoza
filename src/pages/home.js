@@ -124,6 +124,7 @@ define({
                 background-color: var(--color-canela);
             }
 
+            /**/
             .recomendacion {
                 padding: 64px 48px;
                 background-color: var(--color-leche);
@@ -178,12 +179,10 @@ define({
                 font-size: 1rem;
                 line-height: 1.6;
             }
-
             .rec-card img {
                 width: 100%;
-                height: auto;
+                height: 260px;
                 object-fit: contain;
-                padding: 16px;
             }
         </style>
 

@@ -1,6 +1,13 @@
+import { isLoggedIn, isAdmin } from '../utils.js';
+
 export function adminGuard(context, commands) {
     if (!isLoggedIn()) return commands.redirect('/login');
     if (!isAdmin()) return commands.redirect('/');
+    return undefined;
+}
+
+export function authGuard(context, commands) {
+    if (!isLoggedIn()) return commands.redirect('/login');
     return undefined;
 }
 

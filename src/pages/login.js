@@ -144,6 +144,7 @@ define({
                             const data = await response.json();
                             if (response.ok) {
                                 localStorage.setItem('user', JSON.stringify(data));
+                                window.dispatchEvent(new CustomEvent('userChanged'));
                                 data.rol === 'admin' ? Router.go('/admin') : Router.go('/');
                             } else {
                                 host.error = data.message || 'Credenciales incorrectas';

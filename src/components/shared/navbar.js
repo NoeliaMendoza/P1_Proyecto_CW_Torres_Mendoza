@@ -1,10 +1,27 @@
 import { define, html } from 'hybrids';
 import { Router } from '@vaadin/router';
+import { isLoggedIn, getCurrentUser, logout } from '../../utils.js';
 
 define({
     tag: 'nav-bar',
 
-    render: () => html`
+    user: {
+        value: getCurrentUser(),
+        connect: (host) => {
+            const handleChange = () => {
+                host.user = getCurrentUser();
+                host.requestUpdate();
+            };
+            window.addEventListener('storage', handleChange);
+            window.addEventListener('userChanged', handleChange);
+            return () => {
+                window.removeEventListener('storage', handleChange);
+                window.removeEventListener('userChanged', handleChange);
+            };
+        },
+    },
+
+    render: ({ user }) => html`
         <style>
             :host {
                 --color-espresso: #2c1a0e;
@@ -36,7 +53,7 @@ define({
                 display: flex;
                 gap: 12px;
                 flex-wrap: wrap;
-                justify-content: flex-end;
+                justify-content: center;
             }
 
             nav a {
@@ -58,16 +75,43 @@ define({
                 color: var(--color-canela);
             }
 
-            .init-sesion {
+            .init-sesion,
+            .logout-btn {
                 background-color: var(--color-espresso);
                 color: var(--color-leche);
-                border-color: var(--color-espresso);
+                border: 2px solid var(--color-espresso);
+                padding: 5px 24px;
+                border-radius: 30px;
+                font-family: 'Lato', sans-serif;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+                white-space: nowrap;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
             }
 
-            .init-sesion:hover {
+            .init-sesion:hover,
+            .logout-btn:hover {
                 background-color: var(--color-canela);
                 border-color: var(--color-canela);
                 color: var(--color-leche);
+            }
+
+            span {
+                color: var(--color-espresso);
+                font-family: 'Lato', sans-serif;
+                font-weight: 700;
+                padding: 5px 24px;
+            }
+
+            .user-section {
+                display: flex;
+                align-items: center;
+                gap: 12px;
             }
         </style>
 
@@ -76,8 +120,24 @@ define({
             <nav>
                 <a href="/">Inicio</a>
                 <a href="/menu">Menú</a>
-                <a class="init-sesion" href="/login">Iniciar Sesión</a>
+                ${user ? html`<a href="/tracking">Pedidos</a>` : ''}
             </nav>
+            <div class="user-section">
+                ${user
+                    ? html`
+                          <span>Bienvenido, ${user.nombre}</span>
+                          <button
+                              class="logout-btn"
+                              onclick="${() => {
+                                  logout();
+                                  Router.go('/');
+                              }}"
+                          >
+                              Cerrar Sesión
+                          </button>
+                      `
+                    : html` <a class="init-sesion" href="/login">Iniciar Sesión</a> `}
+            </div>
         </header>
     `,
 });
