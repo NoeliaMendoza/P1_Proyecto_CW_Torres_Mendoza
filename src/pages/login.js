@@ -1,9 +1,14 @@
 import { define, html } from 'hybrids';
+import { Router } from '@vaadin/router';
 
 define({
     tag: 'login-page',
 
-    render: () => html`
+    email: '',
+    password: '',
+    error: '',
+
+    render: ({ email, password, error }) => html`
         <style>
             :host {
                 --color-espresso: #2c1a0e;
@@ -12,6 +17,7 @@ define({
                 --color-crema: #e8d5b7;
                 --color-leche: #faf3e8;
             }
+
             .login {
                 min-height: 80vh;
                 display: flex;
@@ -63,20 +69,6 @@ define({
                 outline: none;
             }
 
-            .login-opciones {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                font-size: 0.9rem;
-                color: #fff;
-            }
-
-            .login-opciones a {
-                color: #fff;
-                font-weight: 700;
-                text-decoration: none;
-            }
-
             .login-card button {
                 padding: 15px;
                 border-radius: 30px;
@@ -103,21 +95,71 @@ define({
                 text-decoration: none;
                 color: #fff;
             }
+
+            .error {
+                color: #ff6b6b;
+                text-align: center;
+            }
         </style>
+
         <section class="login">
             <div class="login-card">
                 <h2>Iniciar Sesión</h2>
+
                 <div class="login-field">
                     <label>Email</label>
-                    <input type="email" placeholder="tucorreo@gmail.com" />
-                </div>
-                <div class="login-field">
-                    <label>Contraseña</label>
-                    <input type="password" placeholder="••••••••" />
+
+                    <input
+                        type="email"
+                        placeholder="tucorreo@gmail.com"
+                        value="${email}"
+                        oninput="${(host, e) => (host.email = e.target.value)}"
+                    />
                 </div>
 
-                <button>Iniciar Sesión</button>
-                <p>¿No tienes cuenta? <a href="">Regístrate</a></p>
+                <div class="login-field">
+                    <label>Contraseña</label>
+
+                    <input
+                        type="password"
+                        placeholder="••••••••"
+                        value="${password}"
+                        oninput="${(host, e) => (host.password = e.target.value)}"
+                    />
+                </div>
+
+                ${error ? html`<p class="error">${error}</p>` : ''}
+
+                <button
+                    onclick="${async (host) => {
+                        try {
+                            const response = await fetch('http://localhost:3000/api/admin/login', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    email: host.email,
+                                    password: host.password,
+                                }),
+                            });
+                            const data = await response.json();
+                            if (response.ok) {
+                                localStorage.setItem('user', JSON.stringify(data));
+                                data.rol === 'admin' ? Router.go('/admin') : Router.go('/');
+                            } else {
+                                host.error = data.message || 'Credenciales incorrectas';
+                            }
+                        } catch (e) {
+                            host.error = 'Error de conexión';
+                        }
+                    }}"
+                >
+                    Iniciar Sesión
+                </button>
+
+                <p>
+                    ¿No tienes cuenta?
+                    <a href="/register">Regístrate</a>
+                </p>
             </div>
         </section>
     `,

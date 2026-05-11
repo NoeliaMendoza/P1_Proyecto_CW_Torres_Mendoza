@@ -1,14 +1,10 @@
 import { define, html } from 'hybrids';
 import { Router } from '@vaadin/router';
 
-function updateCount(host) {
-    host.count = getCartCount();
-}
-
 define({
     tag: 'nav-bar',
 
-    render: ({ count }) => html`
+    render: () => html`
         <style>
             :host {
                 --color-espresso: #2c1a0e;

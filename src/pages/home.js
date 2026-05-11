@@ -3,49 +3,25 @@ import { define, html } from 'hybrids';
 define({
     tag: 'home-page',
 
-    categorias: () => [
-        {
-            id: 1,
-            nombre: 'Café',
-            imagen: 'https://i.pinimg.com/736x/b3/c2/ca/b3c2cad3c7c54c458ce05ed7efb4e017.jpg',
+    categorias: {
+        value: [],
+        connect: (host, key) => {
+            fetch('http://localhost:3000/api/productos/categorias')
+                .then((res) => res.json())
+                .then((data) => {
+                    host[key] = [...data];
+                    host.loading = false;
+                })
+                .catch((err) => {
+                    console.error('Error:', err);
+                    host.loading = false;
+                });
         },
-        {
-            id: 2,
-            nombre: 'Bebidas Frías',
-            imagen: 'https://i.pinimg.com/736x/97/6f/e7/976fe7d600238d377e398a77cd45bd51.jpg',
-        },
-        {
-            id: 3,
-            nombre: 'Pasteles',
-            imagen: 'https://i.pinimg.com/1200x/91/43/f0/9143f0ffd9a32e20853564cc45a83150.jpg',
-        },
-        {
-            id: 4,
-            nombre: 'Té',
-            imagen: 'https://i.pinimg.com/736x/27/a8/4d/27a84dcfb3e55fb97f51c7211d48b822.jpg',
-        },
-        {
-            id: 5,
-            nombre: 'Batidos y Jugos',
-            imagen: 'https://i.pinimg.com/736x/4a/d9/de/4ad9de42a38dbd9726ec2122b603771f.jpg',
-        },
-        {
-            id: 6,
-            nombre: 'Postres',
-            imagen: 'https://i.pinimg.com/736x/a6/54/c6/a654c6635a39dd0dbb6e983f17850cae.jpg',
-        },
-        {
-            id: 7,
-            nombre: 'Desayunos',
-            imagen: 'https://i.pinimg.com/736x/15/e4/da/15e4daaa12c438ecd87bd39a10d6983e.jpg',
-        },
-        {
-            id: 8,
-            nombre: 'Sándwiches',
-            imagen: 'https://i.pinimg.com/1200x/3d/fe/06/3dfe06d1246cab07ea7363baa5979352.jpg',
-        },
-    ],
-    render: ({ categorias }) => html`
+    },
+
+    loading: true,
+
+    render: ({ categorias, loading }) => html`
         <style>
             :host {
                 --color-espresso: #2c1a0e;
@@ -54,6 +30,7 @@ define({
                 --color-crema: #e8d5b7;
                 --color-leche: #faf3e8;
             }
+
             .hero {
                 position: relative;
                 height: 80vh;
@@ -93,7 +70,6 @@ define({
                 gap: 12px;
                 flex-wrap: wrap;
                 margin-top: 8px;
-                font-size: 3rem;
             }
 
             .hero-btns a {
@@ -105,17 +81,14 @@ define({
                 transition: all 0.3s ease;
             }
 
-            .hero-btns a {
+            .hero-btns a:first-child {
                 background-color: var(--color-caramelo);
                 color: var(--color-leche);
             }
 
-            .hero-btns a {
-                background-color: var(--color-canela);
-            }
-
             .hero-btns a:last-child {
                 background-color: transparent;
+                color: var(--color-leche);
                 border: 2px solid rgba(255, 255, 255, 0.6);
             }
 
@@ -123,7 +96,6 @@ define({
                 background-color: rgba(255, 255, 255, 0.15);
             }
 
-            /******/
             .categorias-grid {
                 padding: 2rem 4rem;
                 display: grid;
@@ -152,7 +124,6 @@ define({
                 background-color: var(--color-canela);
             }
 
-            /**/
             .recomendacion {
                 padding: 64px 48px;
                 background-color: var(--color-leche);
@@ -207,10 +178,12 @@ define({
                 font-size: 1rem;
                 line-height: 1.6;
             }
+
             .rec-card img {
                 width: 100%;
-                height: 260px;
-                object-fit: cover;
+                height: auto;
+                object-fit: contain;
+                padding: 16px;
             }
         </style>
 
@@ -219,7 +192,7 @@ define({
                 <h2>Marta's Coffee: Calidez en cada taza</h2>
                 <p>Descubre el sabor auténtico del café de especialidad.</p>
                 <div class="hero-btns">
-                    <a href="">Ver menú</a>
+                    <a href="#menu">Ver menú</a>
                     <a href="">Nuestra Historia</a>
                 </div>
             </div>
@@ -231,13 +204,21 @@ define({
                 <a class="btn-ver-mas" href="#menu">Ver menú completo</a>
             </div>
             <div class="categorias-grid">
-                ${categorias.map(
-                    (categoria) => html`
-                        <categoria-card nombre="${categoria.nombre}" src="${categoria.imagen}" />
-                    `,
-                )}
+                ${loading
+                    ? html`<p>Cargando categorías...</p>`
+                    : categorias.length > 0
+                      ? categorias.map(
+                            (categoria) => html`
+                                <categoria-card
+                                    nombre="${categoria.nombre}"
+                                    src="${categoria.imagen_url}"
+                                />
+                            `,
+                        )
+                      : html`<p>No se encontraron categorías</p>`}
             </div>
         </section>
+
         <section class="recomendacion">
             <div class="recomendacion-header">
                 <h2>Hecho para cada momento</h2>

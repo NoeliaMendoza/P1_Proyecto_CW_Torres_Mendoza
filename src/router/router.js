@@ -1,9 +1,5 @@
 import { Router } from '@vaadin/router';
-
-const outlet = document.getElementById('app');
-
-const router = new Router(outlet);
-
+const router = new Router();
 router.setRoutes([
     {
         path: '/',
@@ -17,6 +13,15 @@ router.setRoutes([
         path: '/login',
         component: 'login-page',
     },
+    {
+        path: '/register',
+        component: 'register-page',
+    },
+    {
+        path: '/tracking',
+        component: 'tracking-page',
+    },
+    { path: '/admin', component: 'admin-page' },
     {
         path: '(.*)',
         redirect: '/',

@@ -6,6 +6,8 @@ import './components/shared/footer.js';
 import './pages/home.js';
 import './pages/menu.js';
 import './pages/login.js';
+import './pages/register.js';
+import './pages/tracking.js';
 import './pages/admin.js';
 import './components/home/categoriaCard.js';
 
@@ -17,3 +19,5 @@ import './components/home/categoriaCard.js';
 
 // Router
 import { router } from './router/router.js';
+
+router.setOutlet(document.getElementById('app'));
