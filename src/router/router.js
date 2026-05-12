@@ -12,6 +12,10 @@ router.setRoutes([
         component: 'menu-page',
     },
     {
+        path: '/sugerencias',
+        component: 'sugerencias-page',
+    },
+    {
         path: '/login',
         component: 'login-page',
     },
@@ -25,6 +29,7 @@ router.setRoutes([
         beforeEnter: authGuard,
     },
     { path: '/admin', component: 'admin-page' },
+    { path: '/checkout', component: 'checkout-page' },
     {
         path: '(.*)',
         redirect: '/',

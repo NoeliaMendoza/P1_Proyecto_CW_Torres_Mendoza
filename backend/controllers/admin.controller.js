@@ -108,7 +108,16 @@ router.get('/pedidos', async (req, res) => {
       LEFT JOIN usuarios a ON p.atendido_por = a.id
       ORDER BY p.creado_en DESC
     `);
-        res.json(rows);
+        
+        const pedidosConItems = [];
+        for (const pedido of rows) {
+            const [itemRows] = await db.query('SELECT * FROM pedido_items WHERE pedido_id = ?', [
+                pedido.id,
+            ]);
+            pedidosConItems.push({ ...pedido, items: itemRows });
+        }
+
+        res.json(pedidosConItems);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
