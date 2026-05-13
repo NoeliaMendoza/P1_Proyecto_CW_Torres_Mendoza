@@ -11,75 +11,79 @@ define({
         value: null,
         connect: (host) => {
             const confirmarPedido = async () => {
-            try {
-                const storedCart = sessionStorage.getItem("pedido_pendiente");
-                if (!storedCart) {
-                    host.error = "No hay pedido pendiente.";
+                try {
+                    const storedCart = sessionStorage.getItem('pedido_pendiente');
+                    if (!storedCart) {
+                        host.error = 'No hay pedido pendiente.';
+                        host.cargando = false;
+                        return;
+                    }
+
+                    const cartItems = JSON.parse(storedCart);
+                    if (!cartItems || cartItems.length === 0) {
+                        host.error = 'El carrito está vacío.';
+                        host.cargando = false;
+                        return;
+                    }
+
+                    const user = getCurrentUser() || {};
+
+                    const body = {
+                        usuario_id: user.id || null,
+                        nombre_cliente: user.nombre || 'Cliente Local',
+                        email_cliente: user.email || 'anonimo@example.com',
+                        telefono_cliente: '000000000',
+                        notas: '',
+                        items: cartItems.map((item) => ({
+                            producto_id: item.id,
+                            nombre: item.nombre,
+                            opcion_grupo: '',
+                            opcion_valor: '',
+                            precio_unit: parseFloat(item.precio),
+                            cantidad: item.cantidad,
+                        })),
+                    };
+
+                    const res = await fetch('http://localhost:3000/api/pedidos', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body),
+                    });
+
+                    if (!res.ok) throw new Error('Error al crear el pedido');
+
+                    const data = await res.json();
+
+                    // Limpiar el carrito
+                    sessionStorage.removeItem('pedido_pendiente');
+
+                    // Calcular totales
+                    const subtotal = cartItems.reduce(
+                        (acc, item) => acc + parseFloat(item.precio) * item.cantidad,
+                        0,
+                    );
+                    const impuestos = subtotal * 0.1;
+                    const total = subtotal + impuestos;
+
+                    host.pedidoConfirmado = {
+                        id: data.id,
+                        estado: 'Pendiente',
+                        items: cartItems,
+                        subtotal: subtotal.toFixed(2),
+                        impuestos: impuestos.toFixed(2),
+                        total: total.toFixed(2),
+                    };
+                } catch (err) {
+                    host.error =
+                        'Hay problemas con la conexión a la base de datos. Por favor, vuelve más tarde.';
+                } finally {
                     host.cargando = false;
-                    return;
                 }
+            };
 
-                const cartItems = JSON.parse(storedCart);
-                if (!cartItems || cartItems.length === 0) {
-                    host.error = "El carrito está vacío.";
-                    host.cargando = false;
-                    return;
-                }
-
-                const user = getCurrentUser() || {};
-                
-                const body = {
-                    usuario_id: user.id || null,
-                    nombre_cliente: user.nombre || 'Cliente Local',
-                    email_cliente: user.email || 'anonimo@example.com',
-                    telefono_cliente: '000000000',
-                    notas: '',
-                    items: cartItems.map(item => ({
-                        producto_id: item.id,
-                        nombre: item.nombre,
-                        opcion_grupo: '',
-                        opcion_valor: '',
-                        precio_unit: parseFloat(item.precio),
-                        cantidad: item.cantidad
-                    }))
-                };
-
-                const res = await fetch('http://localhost:3000/api/pedidos', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
-                });
-
-                if (!res.ok) throw new Error('Error al crear el pedido');
-                
-                const data = await res.json();
-                
-                // Limpiar el carrito
-                sessionStorage.removeItem("pedido_pendiente");
-
-                // Calcular totales
-                const subtotal = cartItems.reduce((acc, item) => acc + (parseFloat(item.precio) * item.cantidad), 0);
-                const impuestos = subtotal * 0.10;
-                const total = subtotal + impuestos;
-
-                host.pedidoConfirmado = {
-                    id: data.id,
-                    estado: 'Pendiente',
-                    items: cartItems,
-                    subtotal: subtotal.toFixed(2),
-                    impuestos: impuestos.toFixed(2),
-                    total: total.toFixed(2)
-                };
-                
-            } catch (err) {
-                host.error = err.message;
-            } finally {
-                host.cargando = false;
-            }
-        };
-
-        confirmarPedido();
-    }},
+            confirmarPedido();
+        },
+    },
 
     render: ({ pedidoConfirmado, cargando, error }) => {
         if (cargando) {
@@ -103,7 +107,8 @@ define({
                     background-color: var(--color-leche, #faf3e8);
                     min-height: 100vh;
                     padding: 3rem 1.5rem;
-                    font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", Arial, sans-serif;
+                    font-family:
+                        'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', Arial, sans-serif;
                 }
 
                 .checkout-container {
@@ -448,7 +453,7 @@ define({
                     background-color: rgba(255, 255, 255, 0.1);
                     border: 2px dashed rgba(255, 255, 255, 0.2);
                 }
-                
+
                 .bg-watermark {
                     position: absolute;
                     right: -20px;
@@ -459,13 +464,14 @@ define({
                     color: #fff;
                 }
 
-                .loading, .error-container {
+                .loading,
+                .error-container {
                     text-align: center;
                     padding: 5rem 2rem;
                     font-size: 1.2rem;
                     color: var(--color-canela, #7b4a2d);
                 }
-                
+
                 .error-container h2 {
                     color: var(--color-espresso, #2c1a0e);
                     margin-bottom: 1rem;
@@ -475,7 +481,14 @@ define({
             <div class="checkout-container">
                 <div class="header-section">
                     <div class="icon-check">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="3"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
                             <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
                     </div>
@@ -496,25 +509,35 @@ define({
                                 </div>
                                 <div class="order-status">
                                     <label>Estado</label>
-                                    <div class="badge">
-                                        ${pedidoConfirmado.estado}
-                                    </div>
+                                    <div class="badge">${pedidoConfirmado.estado}</div>
                                 </div>
                             </div>
 
                             <div class="items-list">
-                                ${pedidoConfirmado.items.map(item => html`
-                                    <div class="item-row">
-                                        <img src="${item.imagen_url || 'https://placehold.co/100'}" class="item-image" alt="${item.nombre}" />
-                                        <div class="item-info">
-                                            <h4 class="item-name">${item.nombre}</h4>
-                                            <p class="item-desc">${item.tags && item.tags.length > 0 ? item.tags.join(', ') : 'Recién preparado'}</p>
+                                ${pedidoConfirmado.items.map(
+                                    (item) => html`
+                                        <div class="item-row">
+                                            <img
+                                                src="${item.imagen_url ||
+                                                'https://placehold.co/100'}"
+                                                class="item-image"
+                                                alt="${item.nombre}"
+                                            />
+                                            <div class="item-info">
+                                                <h4 class="item-name">${item.nombre}</h4>
+                                                <p class="item-desc">
+                                                    ${item.tags && item.tags.length > 0
+                                                        ? item.tags.join(', ')
+                                                        : 'Recién preparado'}
+                                                </p>
+                                            </div>
+                                            <div class="item-price">
+                                                ${item.cantidad}×
+                                                $${parseFloat(item.precio).toFixed(2)}
+                                            </div>
                                         </div>
-                                        <div class="item-price">
-                                            ${item.cantidad}× ${(parseFloat(item.precio)).toFixed(2)}€
-                                        </div>
-                                    </div>
-                                `)}
+                                    `,
+                                )}
                             </div>
                         </div>
 
@@ -522,8 +545,18 @@ define({
                             <h3>Detalles de Recogida</h3>
                             <div class="pickup-grid">
                                 <div class="pickup-item">
-                                    <svg class="pickup-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <svg
+                                        class="pickup-icon"
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <path
+                                            d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                                        ></path>
                                         <circle cx="12" cy="10" r="3"></circle>
                                     </svg>
                                     <div class="pickup-content">
@@ -532,7 +565,15 @@ define({
                                     </div>
                                 </div>
                                 <div class="pickup-item">
-                                    <svg class="pickup-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <svg
+                                        class="pickup-icon"
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
                                         <circle cx="12" cy="12" r="10"></circle>
                                         <polyline points="12 6 12 12 16 14"></polyline>
                                     </svg>
@@ -548,23 +589,32 @@ define({
                     <div class="col-right">
                         <div class="card summary-card">
                             <h3>Resumen</h3>
-                            
+
                             <div class="summary-row">
                                 <span>Subtotal</span>
-                                <span>${pedidoConfirmado.subtotal}€</span>
+                                <span>$${pedidoConfirmado.subtotal}</span>
                             </div>
                             <div class="summary-row">
                                 <span>Impuestos (10%)</span>
-                                <span>${pedidoConfirmado.impuestos}€</span>
+                                <span>$${pedidoConfirmado.impuestos}</span>
                             </div>
                             <div class="summary-row total">
                                 <span>Total</span>
-                                <span>${pedidoConfirmado.total}€</span>
+                                <span>$${pedidoConfirmado.total}</span>
                             </div>
 
                             <a href="/tracking" class="btn-primary">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <svg
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <path
+                                        d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                                    ></path>
                                     <polyline points="14 2 14 8 20 8"></polyline>
                                     <line x1="16" y1="13" x2="8" y2="13"></line>
                                     <line x1="16" y1="17" x2="8" y2="17"></line>
@@ -572,9 +622,16 @@ define({
                                 </svg>
                                 Ver Historial
                             </a>
-                            
+
                             <a href="/" class="btn-secondary">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <svg
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
                                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                                     <polyline points="9 22 9 12 15 12 15 22"></polyline>
                                 </svg>
@@ -584,7 +641,9 @@ define({
 
                         <div class="card card-dark loyalty-card">
                             <svg class="bg-watermark" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                                <path
+                                    d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"
+                                ></path>
                                 <line x1="6" y1="1" x2="6" y2="4"></line>
                                 <line x1="10" y1="1" x2="10" y2="4"></line>
                                 <line x1="14" y1="1" x2="14" y2="4"></line>
@@ -592,16 +651,28 @@ define({
 
                             <h3>¡Casi ahí!</h3>
                             <p>Te faltan solo 2 sellos para tu próximo café gratis.</p>
-                            
+
                             <div class="stamps">
                                 <div class="stamp">
-                                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <path
+                                            d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"
+                                        />
+                                    </svg>
                                 </div>
                                 <div class="stamp">
-                                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <path
+                                            d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"
+                                        />
+                                    </svg>
                                 </div>
                                 <div class="stamp">
-                                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <path
+                                            d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"
+                                        />
+                                    </svg>
                                 </div>
                                 <div class="stamp empty"></div>
                                 <div class="stamp empty"></div>
@@ -611,5 +682,5 @@ define({
                 </div>
             </div>
         `;
-    }
+    },
 });

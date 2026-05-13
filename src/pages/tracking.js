@@ -36,6 +36,8 @@ define({
             })
             .catch(() => {
                 host.pedidos = [];
+                host.error =
+                    'Hay problemas con la conexión a la base de datos. Por favor, vuelve más tarde.';
             });
     },
 
@@ -55,7 +57,8 @@ define({
                 }
             })
             .catch(() => {
-                host.error = 'Error al buscar pedido';
+                host.error =
+                    'Hay problemas con la conexión a la base de datos. Por favor, vuelve más tarde.';
                 host.pedido = null;
             });
     },
@@ -478,7 +481,7 @@ define({
                                                 <div class="estado-badge estado-${order.estado}">
                                                     ${order.estado.replace('_', ' ')}
                                                 </div>
-                                                <div><strong>${order.total}€</strong></div>
+                                                <div><strong>$${order.total}</strong></div>
                                                 <button
                                                     class="btn-detalle"
                                                     onclick="${(host) =>
@@ -527,7 +530,7 @@ define({
                                                   >
                                               </div>
                                               <span class="item-precio"
-                                                  >${item.cantidad}× ${item.precio_unit}€</span
+                                                  >${item.cantidad}× $${item.precio_unit}</span
                                               >
                                           </div>
                                       `,
@@ -554,15 +557,15 @@ define({
                                   <h3>Resumen</h3>
                                   <div class="resumen-fila">
                                       <span>Subtotal</span>
-                                      <span>${pedido.total}€</span>
+                                      <span>$${pedido.total}</span>
                                   </div>
                                   <div class="resumen-fila">
                                       <span>Impuestos (10%)</span>
-                                      <span>${(pedido.total * 0.1).toFixed(2)}€</span>
+                                      <span>$${(pedido.total * 0.1).toFixed(2)}</span>
                                   </div>
                                   <div class="resumen-total">
                                       <span>Total</span>
-                                      <span>${(pedido.total * 1.1).toFixed(2)}€</span>
+                                      <span>$${(pedido.total * 1.1).toFixed(2)}</span>
                                   </div>
                               </div>
 
