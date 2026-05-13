@@ -12,7 +12,13 @@ define({
     success: '',
 
     handleSubmit: (host, event) => {
-        event.preventDefault();
+        if (event) event.preventDefault();
+
+        if (!host.nombre || !host.email || !host.password) {
+            host.error = 'Por favor completa todos los campos obligatorios';
+            return;
+        }
+
         fetch('http://localhost:3000/api/admin/register', {
             method: 'POST',
             headers: {
@@ -41,52 +47,171 @@ define({
     },
 
     render: ({ nombre, email, password, telefono, error, success }) => html`
-        <section>
-            <h2>Registrarse</h2>
-            <form onsubmit="${(host) => host.handleSubmit(host, event)}">
-                <div>
-                    <label>Nombre</label>
-                    <input
-                        type="text"
-                        placeholder="Tu nombre completo"
-                        value="${nombre}"
-                        oninput="${(host, event) => (host.nombre = event.target.value)}"
-                        required
-                    />
+        <style>
+            :host {
+                --color-espresso: #2c1a0e;
+                --color-canela: #7b4a2d;
+                --color-caramelo: #c4956a;
+                --color-crema: #e8d5b7;
+                --color-leche: #faf3e8;
+            }
+
+            .register {
+                min-height: 80vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background-image: url('./src/images/fondo.png');
+                background-size: cover;
+                background-position: center;
+                border-radius: 25px;
+                margin: 25px;
+                padding: 40px 20px;
+                box-sizing: border-box;
+            }
+
+            .register-card {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.385);
+                border-radius: 20px;
+                padding: 40px;
+                width: 100%;
+                max-width: 420px;
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                color: #fff;
+            }
+
+            .register-card h2 {
+                text-align: center;
+                font-size: 1.8rem;
+                margin: 0;
+            }
+
+            .register-form {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .register-field {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .register-field label {
+                font-size: 0.95rem;
+            }
+
+            .register-field input {
+                background: transparent;
+                border: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+                padding: 8px 0;
+                color: #fff;
+                font-size: 1rem;
+                outline: none;
+            }
+            
+            .register-field input::placeholder {
+                color: rgba(255, 255, 255, 0.6);
+            }
+
+            .register-card button {
+                padding: 15px;
+                border-radius: 30px;
+                border: none;
+                background-color: rgb(37, 19, 5);
+                color: var(--color-leche);
+                font-weight: 600;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: opacity 0.3s ease;
+                margin-top: 10px;
+                width: 100%;
+            }
+
+            .register-card button:hover {
+                opacity: 0.8;
+            }
+
+            .register-card p {
+                text-align: center;
+                font-size: 1rem;
+                margin-top: 10px;
+            }
+
+            .register-card p a {
+                font-weight: 700;
+                text-decoration: none;
+                color: #fff;
+            }
+
+            .error {
+                color: #ff6b6b;
+                text-align: center;
+                margin: 0;
+            }
+            
+            .success {
+                color: #51cf66;
+                text-align: center;
+                margin: 0;
+            }
+        </style>
+
+        <section class="register">
+            <div class="register-card">
+                <h2>Registrarse</h2>
+                <div class="register-form">
+                    <div class="register-field">
+                        <label>Nombre</label>
+                        <input
+                            type="text"
+                            placeholder="Tu nombre completo"
+                            value="${nombre}"
+                            oninput="${(host, event) => (host.nombre = event.target.value)}"
+                            required
+                        />
+                    </div>
+                    <div class="register-field">
+                        <label>Email</label>
+                        <input
+                            type="email"
+                            placeholder="tucorreo@gmail.com"
+                            value="${email}"
+                            oninput="${(host, event) => (host.email = event.target.value)}"
+                            required
+                        />
+                    </div>
+                    <div class="register-field">
+                        <label>Contraseña</label>
+                        <input
+                            type="password"
+                            placeholder="••••••••"
+                            value="${password}"
+                            oninput="${(host, event) => (host.password = event.target.value)}"
+                            required
+                        />
+                    </div>
+                    <div class="register-field">
+                        <label>Teléfono</label>
+                        <input
+                            type="tel"
+                            placeholder="0991234567"
+                            value="${telefono}"
+                            oninput="${(host, event) => (host.telefono = event.target.value)}"
+                        />
+                    </div>
+                    ${error ? html`<p class="error">${error}</p>` : ''} 
+                    ${success ? html`<p class="success">${success}</p>` : ''}
+                    <button onclick="${(host, event) => host.handleSubmit(host, event)}">Registrarse</button>
                 </div>
-                <div>
-                    <label>Email</label>
-                    <input
-                        type="email"
-                        placeholder="tucorreo@gmail.com"
-                        value="${email}"
-                        oninput="${(host, event) => (host.email = event.target.value)}"
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Contraseña</label>
-                    <input
-                        type="password"
-                        placeholder="••••••••"
-                        value="${password}"
-                        oninput="${(host, event) => (host.password = event.target.value)}"
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Teléfono</label>
-                    <input
-                        type="tel"
-                        placeholder="0991234567"
-                        value="${telefono}"
-                        oninput="${(host, event) => (host.telefono = event.target.value)}"
-                    />
-                </div>
-                ${error ? html`<p>${error}</p>` : ''} ${success ? html`<p>${success}</p>` : ''}
-                <button type="submit">Registrarse</button>
-            </form>
-            <p>¿Ya tienes cuenta? <a href="/login">Iniciar Sesión</a></p>
+                <p>¿Ya tienes cuenta? <a href="/login">Iniciar Sesión</a></p>
+            </div>
         </section>
     `,
 });

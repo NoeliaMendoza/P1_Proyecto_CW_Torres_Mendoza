@@ -140,7 +140,7 @@ define({
       <div class="card-body">
         <div class="card-header">
           <h3 class="card-name">${nombre}</h3>
-          <span class="card-price">${parseFloat(precio).toFixed(2)}€</span>
+          <span class="card-price">$${parseFloat(precio).toFixed(2)}</span>
         </div>
         <p class="card-desc">${descripcion}</p>
         ${tags && tags.length > 0

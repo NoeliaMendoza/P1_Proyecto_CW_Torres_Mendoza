@@ -59,7 +59,7 @@ define({
 
                 // Calcular totales
                 const subtotal = cartItems.reduce((acc, item) => acc + (parseFloat(item.precio) * item.cantidad), 0);
-                const impuestos = subtotal * 0.10;
+                const impuestos = subtotal * 0.15;
                 const total = subtotal + impuestos;
 
                 host.pedidoConfirmado = {
@@ -511,7 +511,7 @@ define({
                                             <p class="item-desc">${item.tags && item.tags.length > 0 ? item.tags.join(', ') : 'Recién preparado'}</p>
                                         </div>
                                         <div class="item-price">
-                                            ${item.cantidad}× ${(parseFloat(item.precio)).toFixed(2)}€
+                                            ${item.cantidad}× $${(parseFloat(item.precio)).toFixed(2)}
                                         </div>
                                     </div>
                                 `)}
@@ -551,15 +551,15 @@ define({
                             
                             <div class="summary-row">
                                 <span>Subtotal</span>
-                                <span>${pedidoConfirmado.subtotal}€</span>
+                                <span>$${pedidoConfirmado.subtotal}</span>
                             </div>
                             <div class="summary-row">
-                                <span>Impuestos (10%)</span>
-                                <span>${pedidoConfirmado.impuestos}€</span>
+                                <span>Impuestos (15%)</span>
+                                <span>$${pedidoConfirmado.impuestos}</span>
                             </div>
                             <div class="summary-row total">
                                 <span>Total</span>
-                                <span>${pedidoConfirmado.total}€</span>
+                                <span>$${pedidoConfirmado.total}</span>
                             </div>
 
                             <a href="/tracking" class="btn-primary">

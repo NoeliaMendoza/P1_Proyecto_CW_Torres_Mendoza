@@ -7,10 +7,11 @@ router.post('/', async (req, res) => {
     const { usuario_id, nombre_cliente, email_cliente, telefono_cliente, notas, items } = req.body;
     try {
         // Calculate total
-        let total = 0;
+        let subtotal = 0;
         for (const item of items) {
-            total += (item.precio_unit + (item.precio_extra || 0)) * item.cantidad;
+            subtotal += (item.precio_unit + (item.precio_extra || 0)) * item.cantidad;
         }
+        const total = subtotal * 1.15; // 15% impuestos
 
         // Insert order
         const [orderResult] = await db.query(

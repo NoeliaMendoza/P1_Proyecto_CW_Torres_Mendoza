@@ -245,13 +245,13 @@ define({
                     class="item-img"
                     src="${item.imagen_url ||
                     item.imagen ||
-                    "https://placehold.co/48x48/e8d5b7/7b4a2d?text=•"}"
+                    "https://placehold.co/48x48/e8d5b7/7b4a2d?text=â$¢"}"
                     alt="${item.nombre}"
                   />
                   <div class="item-info">
                     <div class="item-name">${item.nombre}</div>
                     <div class="item-price">
-                      ${(parseFloat(item.precio) * item.cantidad).toFixed(2)}€
+                      ${(parseFloat(item.precio) * item.cantidad).toFixed(2)}â‚¬
                     </div>
                   </div>
                   <div class="item-controls">
@@ -270,7 +270,7 @@ define({
                         host.items = updated;
                       }}"
                     >
-                      −
+                      âˆ’
                     </button>
                     <span class="qty-value">${item.cantidad}</span>
                     <button
@@ -317,15 +317,15 @@ define({
           <div class="totals">
             <div class="total-row">
               <span>Subtotal</span>
-              <span>${subtotal.toFixed(2)}€</span>
+              <span>${subtotal.toFixed(2)}â‚¬</span>
             </div>
             <div class="total-row">
               <span>Servicio</span>
-              <span>0.50€</span>
+              <span>0.50â‚¬</span>
             </div>
             <div class="total-row grand">
               <span>Total</span>
-              <span>${total.toFixed(2)}€</span>
+              <span>${total.toFixed(2)}â‚¬</span>
             </div>
           </div>
 

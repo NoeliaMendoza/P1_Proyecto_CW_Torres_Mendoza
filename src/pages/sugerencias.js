@@ -45,56 +45,10 @@ define({
           host.cargando = false;
         })
         .catch((err) => {
-          console.warn("Error cargando menú de la API, usando datos de prueba de diseño:", err);
-
-          host.categorias = [
-            { nombre: "Café Especial", slug: "cafe-especial" },
-            { nombre: "Repostería", slug: "reposteria" },
-            { nombre: "Tostadas", slug: "tostadas" }
-          ];
-
-          const mockProds = [
-            {
-              id: 901,
-              nombre: "Flat White",
-              precio: 3.50,
-              descripcion: "Doble shot de espresso con leche vaporizada sedosa para un equilibrio perfecto.",
-              tags: ["Cuerpo medio", "Notas de nuez"],
-              imagen_url: "https://i.pinimg.com/736x/b3/c2/ca/b3c2cad3c7c54c458ce05ed7efb4e017.jpg",
-              _categoria_slug: "cafe-especial"
-            },
-            {
-              id: 902,
-              nombre: "Tostada de Aguacate",
-              precio: 7.20,
-              descripcion: "Pan de masa madre tostado, aguacate maduro, copos de chili y aceite de oliva virgen.",
-              tags: ["Artesanal", "Saludable"],
-              imagen_url: "https://i.pinimg.com/736x/15/e4/da/15e4daaa12c438ecd87bd39a10d6983e.jpg",
-              _categoria_slug: "tostadas"
-            },
-            {
-              id: 903,
-              nombre: "Croissant de Mantequilla",
-              precio: 2.80,
-              descripcion: "Hojaldrado tradicional francés elaborado con mantequilla pura de alta calidad.",
-              tags: ["Recién horneado"],
-              imagen_url: "https://i.pinimg.com/736x/3d/fe/06/3dfe06d1246cab07ea7363baa5979352.jpg",
-              _categoria_slug: "reposteria"
-            },
-            {
-              id: 904,
-              nombre: "V60 Origen",
-              precio: 4.50,
-              descripcion: "Filtrado manual que resalta las notas ácidas y florales de nuestro café de temporada.",
-              tags: ["Floral", "Acidez cítrica"],
-              imagen_url: "https://i.pinimg.com/736x/97/6f/e7/976fe7d600238d377e398a77cd45bd51.jpg",
-              _categoria_slug: "cafe-especial"
-            }
-          ];
-
-          host.productos = mockProds;
-          host.productosFiltrados = mockProds;
+          console.error("Error cargando menú de la API:", err);
           host.cargando = false;
+          host.productos = [];
+          host.productosFiltrados = [];
         });
     }
   },
@@ -491,7 +445,7 @@ define({
                           <img
                             class="item-img"
                             src="${item.imagen_url ||
-            "https://placehold.co/48x48/e8d5b7/7b4a2d?text=•"}"
+            "https://placehold.co/48x48/e8d5b7/7b4a2d?text=â$¢"}"
                             alt="${item.nombre}"
                           />
                           <div class="item-info">
@@ -499,7 +453,7 @@ define({
                             <div class="item-price">
                               ${(
               parseFloat(item.precio) * item.cantidad
-            ).toFixed(2)}€
+            ).toFixed(2)}â‚¬
                             </div>
                           </div>
                           <div class="item-controls">
@@ -507,7 +461,7 @@ define({
                               class="qty-btn"
                               onclick=${() => handleQty(idx, -1)}
                             >
-                              −
+                              âˆ’
                             </button>
                             <span class="qty-value">${item.cantidad}</span>
                             <button
@@ -545,15 +499,15 @@ define({
                   <div class="totals">
                     <div class="total-row">
                       <span>Subtotal</span>
-                      <span>${subtotal.toFixed(2)}€</span>
+                      <span>${subtotal.toFixed(2)}â‚¬</span>
                     </div>
                     <div class="total-row">
                       <span>Servicio</span>
-                      <span>0.50€</span>
+                      <span>0.50â‚¬</span>
                     </div>
                     <div class="total-row grand">
                       <span>Total</span>
-                      <span>${total.toFixed(2)}€</span>
+                      <span>${total.toFixed(2)}â‚¬</span>
                     </div>
                   </div>
 

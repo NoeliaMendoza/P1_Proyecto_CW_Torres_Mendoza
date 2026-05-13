@@ -315,7 +315,7 @@ define({
               <div class="sug-content">
                 <div class="sug-header-row">
                   <h3 class="sug-name">${p.nombre}</h3>
-                  <span class="sug-price">${parseFloat(p.precio).toFixed(2)}€</span>
+                  <span class="sug-price">$${parseFloat(p.precio).toFixed(2)}</span>
                 </div>
                 <p class="sug-desc">${p.descripcion}</p>
                 <button class="sug-add-btn" onclick=${() => handleAñadir(p)}>+ Añadir al pedido</button>

@@ -370,7 +370,7 @@ define({
                     </div>
                     <div class="kpi-info">
                         <h4>Ventas Hoy</h4>
-                        <p>${totalVentas}€</p>
+                        <p>$${totalVentas}</p>
                     </div>
                 </div>
                 <div class="kpi-card">
@@ -444,7 +444,7 @@ define({
 
                             return html`
                             <tr>
-                                <td class="id-col">#ORD-${9400 + pedido.id}</td>
+                                <td class="id-col">#MC-${pedido.id}</td>
                                 <td>
                                     <div class="client-col">
                                         <div class="avatar" style="background-color: ${getAvatarColor(name)}">
@@ -459,7 +459,7 @@ define({
                                 <td class="products-col" title="${itemsText}">
                                     ${itemsText}
                                 </td>
-                                <td class="total-col">${parseFloat(pedido.total).toFixed(2)}€</td>
+                                <td class="total-col">$${parseFloat(pedido.total).toFixed(2)}</td>
                                 <td>
                                     <div class="badge ${pedido.estado}" onclick="${host => {
                                         // Rotar estado para la demo admin rápida (opcional, podrías hacer un modal)

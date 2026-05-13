@@ -28,7 +28,11 @@ router.setRoutes([
         component: 'tracking-page',
         beforeEnter: authGuard,
     },
-    { path: '/admin', component: 'admin-page' },
+    { 
+        path: '/admin', 
+        component: 'admin-page',
+        beforeEnter: adminGuard
+    },
     { path: '/checkout', component: 'checkout-page' },
     {
         path: '(.*)',
