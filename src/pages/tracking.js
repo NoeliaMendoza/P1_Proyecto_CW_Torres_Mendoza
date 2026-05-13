@@ -5,54 +5,51 @@ define({
     tag: 'tracking-page',
 
     pedidoId: '',
-    pedido: { value: null },
-    pedidos: {
-        value: [],
-        connect: (host) => {
-            const loadData = () => {
-                const user = getCurrentUser();
-                if (!user) {
-                    host.pedidos = [];
-                    return;
-                }
-                fetch(`http://localhost:3000/api/pedidos/usuario/${user.id}`)
-                    .then((res) => res.json())
-                    .then((data) => {
-                        host.pedidos = data;
-                    })
-                    .catch(() => {
-                        host.pedidos = [];
-                    });
-            };
-            
-            const handleUserChange = () => {
-                host.requestUpdate();
-                loadData();
-            };
-            window.addEventListener('userChanged', handleUserChange);
-            loadData();
-            
-            return () => {
-                window.removeEventListener('userChanged', handleUserChange);
-            };
-        }
-    },
-    
+    pedido: null,
+    pedidos: () => [],
     user: () => getCurrentUser(),
     error: '',
 
+    connected: (host) => {
+        const handleUserChange = () => {
+            host.requestUpdate();
+            host.loadPedidosUsuario(host);
+        };
+        window.addEventListener('userChanged', handleUserChange);
+        host.loadPedidosUsuario(host);
+        return () => {
+            window.removeEventListener('userChanged', handleUserChange);
+        };
+    },
+
+    loadPedidosUsuario: (host) => {
+        const user = getCurrentUser();
+        if (!user) {
+            host.pedidos = [];
+            return;
+        }
+
+        fetch(`http://localhost:3000/api/pedidos/usuario/${user.id}`)
+            .then((res) => res.json())
+            .then((data) => {
+                host.pedidos = data;
+            })
+            .catch(() => {
+                host.pedidos = [];
+                host.error =
+                    'Hay problemas con la conexión a la base de datos. Por favor, vuelve más tarde.';
+            });
+    },
+
     buscarPedido: (host, id) => {
-        console.log("buscarPedido called with id:", id);
         const pedidoId = id || host.pedidoId;
         if (!pedidoId) return;
         host.pedidoId = pedidoId;
         fetch(`http://localhost:3000/api/pedidos/${pedidoId}`)
             .then((res) => res.json())
             .then((data) => {
-                console.log("pedido data fetched:", data);
                 if (data.id) {
                     host.pedido = data;
-                    console.log("host.pedido updated:", host.pedido);
                     host.error = '';
                 } else {
                     host.error = 'Pedido no encontrado';
@@ -60,7 +57,8 @@ define({
                 }
             })
             .catch(() => {
-                host.error = 'Error al buscar pedido';
+                host.error =
+                    'Hay problemas con la conexión a la base de datos. Por favor, vuelve más tarde.';
                 host.pedido = null;
             });
     },
@@ -451,117 +449,6 @@ define({
                 max-width: 400px;
                 margin: 0 auto 1rem;
             }
-
-            /* Modal / Miniatura */
-            .modal-overlay {
-                position: fixed;
-                top: 0; left: 0; right: 0; bottom: 0;
-                background: rgba(0, 0, 0, 0.6);
-                backdrop-filter: blur(4px);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 1000;
-                padding: 1rem;
-                opacity: 0;
-                animation: fadeIn 0.3s forwards;
-            }
-
-            @keyframes fadeIn {
-                to { opacity: 1; }
-            }
-
-            .modal-content {
-                background: var(--color-leche);
-                border-radius: 20px;
-                padding: 2rem;
-                width: 100%;
-                max-width: 450px;
-                max-height: 90vh;
-                overflow-y: auto;
-                position: relative;
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-                border: 1px solid var(--color-crema);
-                transform: translateY(20px);
-                animation: slideUp 0.3s forwards;
-            }
-
-            @keyframes slideUp {
-                to { transform: translateY(0); }
-            }
-
-            .modal-close {
-                position: absolute;
-                top: 1rem;
-                right: 1.5rem;
-                background: transparent;
-                border: none;
-                font-size: 2rem;
-                color: var(--color-espresso);
-                cursor: pointer;
-                line-height: 1;
-                transition: color 0.3s;
-                padding: 0;
-            }
-
-            .modal-close:hover {
-                color: var(--color-canela);
-            }
-
-            .miniatura-header {
-                text-align: center;
-                margin-bottom: 1.5rem;
-                padding-bottom: 1rem;
-                border-bottom: 2px dashed var(--color-crema);
-            }
-
-            .miniatura-header h2 {
-                color: var(--color-espresso);
-                font-size: 1.5rem;
-                margin: 0 0 0.5rem;
-            }
-
-            .miniatura-items {
-                margin-bottom: 1.5rem;
-            }
-            
-            .miniatura-item {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 0.5rem 0;
-                border-bottom: 1px solid rgba(0,0,0,0.05);
-            }
-
-            .miniatura-item:last-child {
-                border-bottom: none;
-            }
-
-            .miniatura-resumen {
-                background: #fff;
-                padding: 1rem;
-                border-radius: 12px;
-                border: 1px solid var(--color-crema);
-            }
-            
-            .miniatura-resumen-row {
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 0.5rem;
-                color: var(--color-canela);
-                font-size: 0.9rem;
-            }
-            
-            .miniatura-resumen-total {
-                display: flex;
-                justify-content: space-between;
-                font-weight: 700;
-                color: var(--color-espresso);
-                font-size: 1.1rem;
-                margin-top: 0.5rem;
-                padding-top: 0.5rem;
-                border-top: 1px solid var(--color-crema);
-            }
         </style>
 
         <div class="page">
@@ -577,16 +464,7 @@ define({
                                     (order) => html`
                                         <div
                                             class="historial-card clickable"
-                                            onclick="${(host) => {
-                                                fetch(`http://localhost:3000/api/pedidos/${order.id}`)
-                                                    .then(res => res.json())
-                                                    .then(data => {
-                                                        if(data.id) {
-                                                            host.pedido = data;
-                                                            host.error = '';
-                                                        }
-                                                    });
-                                            }}"
+                                            onclick="${(host) => host.buscarPedido(host, order.id)}"
                                         >
                                             <div class="historial-row">
                                                 <div>
@@ -606,16 +484,8 @@ define({
                                                 <div><strong>$${order.total}</strong></div>
                                                 <button
                                                     class="btn-detalle"
-                                                    onclick="${(host) => {
-                                                        fetch(`http://localhost:3000/api/pedidos/${order.id}`)
-                                                            .then(res => res.json())
-                                                            .then(data => {
-                                                                if(data.id) {
-                                                                    host.pedido = data;
-                                                                    host.error = '';
-                                                                }
-                                                            });
-                                                    }}"
+                                                    onclick="${(host) =>
+                                                        host.buscarPedido(host, order.id)}"
                                                 >
                                                     Ver detalle
                                                 </button>
@@ -629,50 +499,89 @@ define({
                 : html`<p class="no-pedidos">Debes iniciar sesión para ver tus pedidos.</p>`}
             ${pedido
                 ? html`
-                      <div class="modal-overlay" onclick="${(host) => { host.pedido = null; host.pedidoId = ''; }}">
-                          <div class="modal-content" onclick="${(host, e) => e.stopPropagation()}">
-                              <button class="modal-close" onclick="${(host) => { host.pedido = null; host.pedidoId = ''; }}">×</button>
-                              
-                              <div class="miniatura-header">
-                                  <div class="confirmado-icono" style="margin: 0 auto 0.5rem; width: 48px; height: 48px; font-size: 1.4rem;">🧾</div>
-                                  <h2>Pedido #MC-${pedido.id}</h2>
-                                  <span class="estado-badge estado-${pedido.estado}" style="display: inline-flex; margin: 0 auto;">
-                                      ${pedido.estado.replace('_', ' ')}
-                                  </span>
-                              </div>
+                      <div class="confirmado">
+                          <div class="confirmado-icono">🧾</div>
+                          <h1>Detalle del pedido</h1>
+                          <p>Revisa aquí la información completa de tu pedido seleccionado.</p>
+                      </div>
 
-                              <div class="miniatura-items">
+                      <div class="content">
+                          <div class="col-left">
+                              <div class="card">
+                                  <div class="pedido-header">
+                                      <div class="pedido-numero">
+                                          <label>Número de Pedido</label>
+                                          <h2>#MC-${pedido.id}</h2>
+                                      </div>
+                                      <span class="estado-badge estado-${pedido.estado}">
+                                          ● ${pedido.estado.replace('_', ' ')}
+                                      </span>
+                                  </div>
+
                                   ${pedido.items.map(
                                       (item) => html`
-                                          <div class="miniatura-item">
+                                          <div class="item">
                                               <div class="item-info">
-                                                  <strong style="font-size: 0.95rem; color: var(--color-espresso);">${item.cantidad}x ${item.nombre}</strong>
-                                                  ${item.opcion_grupo ? html`<small style="display:block; margin-top:2px; color: var(--color-canela); font-size: 0.8rem;">${item.opcion_grupo}: ${item.opcion_valor}</small>` : ''}
+                                                  <strong>${item.nombre}</strong>
+                                                  <small
+                                                      >${item.opcion_grupo
+                                                          ? `${item.opcion_grupo}: ${item.opcion_valor}`
+                                                          : ''}</small
+                                                  >
                                               </div>
-                                              <span class="item-precio" style="font-size: 0.95rem; font-weight: 700;">$${(parseFloat(item.precio_unit) * item.cantidad).toFixed(2)}</span>
+                                              <span class="item-precio"
+                                                  >${item.cantidad}× $${item.precio_unit}</span
+                                              >
                                           </div>
-                                      `
+                                      `,
                                   )}
                               </div>
 
-                              <div class="miniatura-resumen">
-                                  <div class="miniatura-resumen-row">
-                                      <span>Subtotal</span>
-                                      <span>$${(pedido.total / 1.15).toFixed(2)}</span>
-                                  </div>
-                                  <div class="miniatura-resumen-row">
-                                      <span>Impuestos (15%)</span>
-                                      <span>$${(pedido.total - (pedido.total / 1.15)).toFixed(2)}</span>
-                                  </div>
-                                  <div class="miniatura-resumen-total">
-                                      <span>Total</span>
-                                      <span>$${parseFloat(pedido.total).toFixed(2)}</span>
+                              <div class="card">
+                                  <h3>Detalles de Recogida</h3>
+                                  <div class="recogida-grid">
+                                      <div class="recogida-item">
+                                          <label>Ubicación</label>
+                                          <p>Marta's Coffee - ESPE, Sangolquí</p>
+                                      </div>
+                                      <div class="recogida-item">
+                                          <label>Tiempo Estimado</label>
+                                          <p>10 - 15 minutos</p>
+                                      </div>
                                   </div>
                               </div>
-                              
-                              <div style="margin-top: 1.5rem; text-align: center;">
-                                  <p style="font-size: 0.85rem; color: var(--color-canela); margin-bottom: 0.8rem;">Recogida en Marta's Coffee (10-15 min)</p>
-                                  <button class="btn-detalle" style="width: 100%;" onclick="${(host) => { host.pedido = null; host.pedidoId = ''; }}">Cerrar detalle</button>
+                          </div>
+
+                          <div class="col-right">
+                              <div class="card resumen">
+                                  <h3>Resumen</h3>
+                                  <div class="resumen-fila">
+                                      <span>Subtotal</span>
+                                      <span>$${pedido.total}</span>
+                                  </div>
+                                  <div class="resumen-fila">
+                                      <span>Impuestos (10%)</span>
+                                      <span>$${(pedido.total * 0.1).toFixed(2)}</span>
+                                  </div>
+                                  <div class="resumen-total">
+                                      <span>Total</span>
+                                      <span>$${(pedido.total * 1.1).toFixed(2)}</span>
+                                  </div>
+                              </div>
+
+                              <button class="btn-historial">Ver Historial</button>
+                              <a class="btn-inicio" href="/">Volver al Inicio</a>
+
+                              <div class="sellos">
+                                  <h4>¡Casi ahí!</h4>
+                                  <p>Te faltan solo 2 sellos para tu próximo café gratis.</p>
+                                  <div class="sellos-dots">
+                                      <div class="sello">1</div>
+                                      <div class="sello">2</div>
+                                      <div class="sello">3</div>
+                                      <div class="sello vacio"></div>
+                                      <div class="sello vacio"></div>
+                                  </div>
                               </div>
                           </div>
                       </div>

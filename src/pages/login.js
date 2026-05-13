@@ -150,7 +150,8 @@ define({
                                 host.error = data.message || 'Credenciales incorrectas';
                             }
                         } catch (e) {
-                            host.error = 'Error de conexión';
+                            host.error =
+                                'Hay problemas con la conexión a la base de datos. Por favor, vuelve más tarde.';
                         }
                     }}"
                 >
