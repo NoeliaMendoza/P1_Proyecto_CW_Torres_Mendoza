@@ -265,7 +265,7 @@ define({
                 <h2>Marta's Coffee: Calidez en cada taza</h2>
                 <p>Descubre el sabor auténtico del café de especialidad.</p>
                 <div class="hero-btns">
-                    <a href="#menu">Ver menú</a>
+                    <a href="/menu">Ver menú</a>
                     <a
                         href="#"
                         onclick="${(host, e) => {
@@ -308,7 +308,7 @@ define({
         <section>
             <div class="categorias-titulo">
                 <h2>Explora Nuestras Categorías</h2>
-                <a class="btn-ver-mas" href="#menu">Ver menú completo</a>
+                <a class="btn-ver-mas" href="/menu">Ver menú completo</a>
             </div>
             ${error
                 ? html`<div class="error-message">${error}</div>`

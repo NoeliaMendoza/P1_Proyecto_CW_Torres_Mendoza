@@ -367,7 +367,7 @@ define({
                     align-items: center;
                     justify-content: center;
                     gap: 0.5rem;
-                    width: 100%;
+                    width: 90%;
                     padding: 1rem;
                     background-color: #8c5a3b;
                     color: #fff;
@@ -391,7 +391,7 @@ define({
                     align-items: center;
                     justify-content: center;
                     gap: 0.5rem;
-                    width: 100%;
+                    width: 90%;
                     padding: 1rem;
                     background-color: transparent;
                     color: var(--color-espresso, #2c1a0e);
