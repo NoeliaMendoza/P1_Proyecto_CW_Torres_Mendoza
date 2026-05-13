@@ -108,8 +108,7 @@ define({
     const handleConfirmar = () => {
       if (cartItems.length === 0) return;
       sessionStorage.setItem("pedido_pendiente", JSON.stringify(cartItems));
-      window.history.pushState({}, "", "/checkout");
-      window.dispatchEvent(new PopStateEvent("popstate"));
+      window.location.href = "/checkout";
     };
 
     const subtotal = cartItems.reduce(
@@ -445,15 +444,15 @@ define({
                           <img
                             class="item-img"
                             src="${item.imagen_url ||
-            "https://placehold.co/48x48/e8d5b7/7b4a2d?text=â$¢"}"
+            "https://placehold.co/48x48/e8d5b7/7b4a2d?text=☕"}"
                             alt="${item.nombre}"
                           />
                           <div class="item-info">
                             <div class="item-name">${item.nombre}</div>
                             <div class="item-price">
-                              ${(
+                              $${(
               parseFloat(item.precio) * item.cantidad
-            ).toFixed(2)}â‚¬
+            ).toFixed(2)}
                             </div>
                           </div>
                           <div class="item-controls">
@@ -461,7 +460,7 @@ define({
                               class="qty-btn"
                               onclick=${() => handleQty(idx, -1)}
                             >
-                              âˆ’
+                              -
                             </button>
                             <span class="qty-value">${item.cantidad}</span>
                             <button
@@ -499,15 +498,15 @@ define({
                   <div class="totals">
                     <div class="total-row">
                       <span>Subtotal</span>
-                      <span>${subtotal.toFixed(2)}â‚¬</span>
+                      <span>$${subtotal.toFixed(2)}</span>
                     </div>
                     <div class="total-row">
                       <span>Servicio</span>
-                      <span>0.50â‚¬</span>
+                      <span>$0.50</span>
                     </div>
                     <div class="total-row grand">
                       <span>Total</span>
-                      <span>${total.toFixed(2)}â‚¬</span>
+                      <span>$${total.toFixed(2)}</span>
                     </div>
                   </div>
 

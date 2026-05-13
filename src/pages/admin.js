@@ -16,10 +16,32 @@ function getAvatarColor(name) {
     return colors[index];
 }
 
+const updatePedidoEstado = (host, pedidoId, estado) => {
+    fetch(`http://localhost:3000/api/admin/pedidos/${pedidoId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ estado }),
+    })
+        .then(() => {
+            // Forzar recarga
+            fetch('http://localhost:3000/api/admin/pedidos')
+                .then((response) => response.json())
+                .then((data) => {
+                    host.pedidosList = data;
+                });
+        })
+        .catch((error) => console.error('Error updating pedido:', error));
+};
+
 define({
     tag: 'admin-page',
 
     activeTab: 'pedidos',
+    searchQuery: '',
+    filterEstado: 'todos',
+    openMenuId: 0,
     pedidosList: {
         value: [],
         connect: (host) => {
@@ -40,29 +62,26 @@ define({
         },
     },
 
-    updatePedidoEstado: (host, pedidoId, estado) => {
-        fetch(`http://localhost:3000/api/admin/pedidos/${pedidoId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ estado }),
-        })
-            .then(() => {
-                // Forzar recarga
-                fetch('http://localhost:3000/api/admin/pedidos')
-                    .then((response) => response.json())
-                    .then((data) => {
-                        host.pedidosList = data;
-                    });
-            })
-            .catch((error) => console.error('Error updating pedido:', error));
-    },
 
-    render: ({ activeTab, pedidosList }) => {
+
+    render: ({ activeTab, pedidosList, searchQuery, filterEstado, openMenuId }) => {
         // Calcular estadisticas
-        const totalVentas = pedidosList.reduce((acc, p) => acc + parseFloat(p.total), 0).toFixed(2);
+        const hoy = new Date().toDateString();
+        const ventasHoy = pedidosList
+            .filter(p => new Date(p.creado_en).toDateString() === hoy)
+            .reduce((acc, p) => acc + parseFloat(p.total), 0).toFixed(2);
         const totalPedidos = pedidosList.length;
+        const clientesUnicos = new Set(pedidosList.map(p => p.email_cliente || p.nombre_cliente)).size;
+
+        // Filtrar pedidos
+        const filteredPedidos = pedidosList.filter(p => {
+            const q = searchQuery.toLowerCase();
+            const matchesSearch = (p.nombre_cliente || '').toLowerCase().includes(q) ||
+                (p.email_cliente || '').toLowerCase().includes(q) ||
+                String(9400 + p.id).includes(q);
+            const matchesFilter = filterEstado === 'todos' || p.estado === filterEstado;
+            return matchesSearch && matchesFilter;
+        });
 
         return html`
             <style>
@@ -322,14 +341,53 @@ define({
                     background-color: #f5f5f5;
                     color: #757575;
                 }
+                .badge.cancelado {
+                    background-color: #ffebee;
+                    color: #c62828;
+                }
 
                 .actions-col {
                     color: #8c7c70;
                     cursor: pointer;
+                    position: relative;
                 }
 
                 .actions-col:hover {
                     color: var(--color-espresso);
+                }
+
+                .dropdown-menu {
+                    position: absolute;
+                    right: 0;
+                    top: 100%;
+                    background: #fff;
+                    border: 1px solid var(--color-border);
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    z-index: 100;
+                    display: flex;
+                    flex-direction: column;
+                    min-width: 150px;
+                    overflow: hidden;
+                }
+                
+                .dropdown-menu button {
+                    padding: 0.8rem 1rem;
+                    border: none;
+                    background: transparent;
+                    text-align: left;
+                    cursor: pointer;
+                    font-family: inherit;
+                    font-size: 0.85rem;
+                    color: var(--color-espresso);
+                    border-bottom: 1px solid var(--color-border);
+                }
+
+                .dropdown-menu button:hover {
+                    background: var(--color-card-bg);
+                }
+                .dropdown-menu button:last-child {
+                    border-bottom: none;
                 }
 
                 /* Pagination */
@@ -397,7 +455,7 @@ define({
                         </div>
                         <div class="kpi-info">
                             <h4>Ventas Hoy</h4>
-                            <p>$${totalVentas}</p>
+                            <p>$${ventasHoy}</p>
                         </div>
                     </div>
                     <div class="kpi-card">
@@ -441,7 +499,7 @@ define({
                         </div>
                         <div class="kpi-info">
                             <h4>Nuevos Clientes</h4>
-                            <p>12</p>
+                            <p>${clientesUnicos}</p>
                         </div>
                     </div>
                     <div class="kpi-card">
@@ -482,35 +540,25 @@ define({
                                 <circle cx="11" cy="11" r="8" />
                                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
                             </svg>
-                            <input type="text" placeholder="Buscar pedido o cliente..." />
+                            <input 
+                                type="text" 
+                                placeholder="Buscar pedido o cliente..." 
+                                value="${searchQuery}"
+                                oninput="${(host, e) => host.searchQuery = e.target.value}"
+                            />
                         </div>
-                        <button class="btn-filter">
-                            <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                            >
-                                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-                            </svg>
-                            Filtros
-                        </button>
-                        <button class="btn-new">
-                            <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                            >
-                                <line x1="12" y1="5" x2="12" y2="19" />
-                                <line x1="5" y1="12" x2="19" y2="12" />
-                            </svg>
-                            Nuevo Pedido
-                        </button>
+                        <select 
+                            class="btn-filter" 
+                            style="cursor: pointer; appearance: auto; background-color: #fff;"
+                            onchange="${(host, e) => host.filterEstado = e.target.value}"
+                        >
+                            <option value="todos" selected=${filterEstado === 'todos'}>Todos los Estados</option>
+                            <option value="pendiente" selected=${filterEstado === 'pendiente'}>Pendientes</option>
+                            <option value="en_proceso" selected=${filterEstado === 'en_proceso'}>En Proceso</option>
+                            <option value="listo" selected=${filterEstado === 'listo'}>Listos</option>
+                            <option value="entregado" selected=${filterEstado === 'entregado'}>Entregados</option>
+                            <option value="cancelado" selected=${filterEstado === 'cancelado'}>Cancelados</option>
+                        </select>
                     </div>
                 </div>
 
@@ -528,17 +576,17 @@ define({
                             </tr>
                         </thead>
                         <tbody>
-                            ${pedidosList.map((pedido) => {
-                                const name = pedido.nombre_cliente || 'Cliente';
-                                const email = pedido.email_cliente || 'cliente@email.com';
-                                const itemsText =
-                                    pedido.items && pedido.items.length
-                                        ? pedido.items
-                                              .map((i) => `${i.cantidad}x ${i.nombre}`)
-                                              .join(', ')
-                                        : 'Productos variados';
+                            ${filteredPedidos.map((pedido) => {
+            const name = pedido.nombre_cliente || 'Cliente';
+            const email = pedido.email_cliente || 'cliente@email.com';
+            const itemsText =
+                pedido.items && pedido.items.length
+                    ? pedido.items
+                        .map((i) => `${i.cantidad}x ${i.nombre}`)
+                        .join(', ')
+                    : 'Productos variados';
 
-                                return html`
+            return html`
                                     <tr>
                                         <td class="id-col">#ORD-${9400 + pedido.id}</td>
                                         <td>
@@ -546,8 +594,8 @@ define({
                                                 <div
                                                     class="avatar"
                                                     style="background-color: ${getAvatarColor(
-                                                        name,
-                                                    )}"
+                name,
+            )}"
                                                 >
                                                     ${getInitials(name)}
                                                 </div>
@@ -564,52 +612,55 @@ define({
                                             $${parseFloat(pedido.total).toFixed(2)}
                                         </td>
                                         <td>
-                                            <div
-                                                class="badge ${pedido.estado}"
-                                                onclick="${(host) => {
-                                                    // Rotar estado para la demo admin rápida (opcional, podrías hacer un modal)
-                                                    const estados = [
-                                                        'pendiente',
-                                                        'en_proceso',
-                                                        'listo',
-                                                        'entregado',
-                                                    ];
-                                                    let next = estados.indexOf(pedido.estado) + 1;
-                                                    if (next >= estados.length) next = 0;
-                                                    host.updatePedidoEstado(
-                                                        host,
-                                                        pedido.id,
-                                                        estados[next],
-                                                    );
-                                                }}"
-                                                style="cursor:pointer"
-                                                title="Click para cambiar estado"
-                                            >
+                                            <div class="badge ${pedido.estado}">
                                                 ${pedido.estado.charAt(0).toUpperCase() +
-                                                pedido.estado.slice(1).replace('_', ' ')}
+                pedido.estado.slice(1).replace('_', ' ')}
                                             </div>
                                         </td>
                                         <td class="actions-col">
-                                            <svg
-                                                width="20"
-                                                height="20"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                stroke-width="2"
+                                            <div 
+                                                onclick="${(host, e) => {
+                    e.stopPropagation();
+                    host.openMenuId = host.openMenuId === pedido.id ? 0 : pedido.id;
+                }}"
+                                                style="display: inline-block; padding: 5px;"
                                             >
-                                                <circle cx="12" cy="12" r="1" />
-                                                <circle cx="12" cy="5" r="1" />
-                                                <circle cx="12" cy="19" r="1" />
-                                            </svg>
+                                                <svg
+                                                    width="20"
+                                                    height="20"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="2"
+                                                >
+                                                    <circle cx="12" cy="12" r="1" />
+                                                    <circle cx="12" cy="5" r="1" />
+                                                    <circle cx="12" cy="19" r="1" />
+                                                </svg>
+                                            </div>
+                                            ${openMenuId === pedido.id ? html`
+                                                <div class="dropdown-menu">
+                                                    ${['pendiente', 'en_proceso', 'listo', 'entregado', 'cancelado']
+                        .filter(st => st !== String(pedido.estado || '').trim().toLowerCase())
+                        .map(st => html`
+                                                        <button onclick="${(host, e) => {
+                                e.stopPropagation();
+                                updatePedidoEstado(host, pedido.id, st);
+                                host.openMenuId = 0;
+                            }}">
+                                                            Marcar como ${st.replace('_', ' ')}
+                                                        </button>
+                                                    `)}
+                                                </div>
+                                            ` : ''}
                                         </td>
                                     </tr>
                                 `;
-                            })}
+        })}
                         </tbody>
                     </table>
                     <div class="pagination-bar">
-                        <span class="pagination-info">Mostrando ${pedidosList.length} pedidos</span>
+                        <span class="pagination-info">Mostrando ${filteredPedidos.length} pedidos</span>
                         <div class="pagination-controls">
                             <button class="page-btn">
                                 <svg
